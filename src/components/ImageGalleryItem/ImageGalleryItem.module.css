@@ -1,0 +1,11 @@
+.ImageGalleryImage{
+    width: 360px;
+    height: 260px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.ImageGalleryImage:hover{
+    scale: 105%;
+    opacity: 60%;
+}

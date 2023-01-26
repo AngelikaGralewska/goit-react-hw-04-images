@@ -1,0 +1,24 @@
+.button{
+    border: none;
+    cursor: pointer;
+    font-size: small;
+    font-weight: lighter;
+    height: 35px;
+    width: 170px;
+    align-items: center;
+    margin-top: 5px;
+    background-color: #696969;
+    color: #ffff;
+    margin:30px;
+}
+    
+.button:hover{
+    scale: 105%;
+    opacity: 60%;
+ }
+
+ .buttonContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
