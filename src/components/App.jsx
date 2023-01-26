@@ -1,4 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { useState } from 'react';
+import { useEffect } from 'react';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -11,84 +14,82 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 
 
+export const App = () => {
+    const [query, setQuery] = useState('');
+    const [hits, setHits] = useState([]);
+    const [page, setPage] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalHits, setTotalHits] = useState('');
+    const [selectedImage, setSelectedImage] = useState(null);
 
-export class App extends Component {
-  state = {
-    query: '',
-    hits: [],
-    page: 1,
-    loading: false,
-    totalHits: "",
-    selectedImage: null,
-    shouModal: false,
-  };
+  useEffect(() => {
+    if (query === '') {
+        return;
+      }
 
-  async componentDidUpdate(_, prevState) {
-    if ( prevState.query !== this.state.query || prevState.page !== this.state.page) 
-    {
+    async function fetchGallery () {
       try {
-        this.setState({ loading: true });
-        const { query, page } = this.state;
+        setIsLoading(true);
         const { hits, totalHits } = await fetchApi(query, page);
 
         if (!totalHits) {
           toast.error(`Nothing found for your request`);
           return;
         }
+        const images = hits.map(
+          ({  id, webformatURL, largeImageURL, tags }) => ({
+            id,
+            webformatURL,
+            largeImageURL,
+            tags
+          })
+        );
 
-        this.setState(prevState => ({
-          hits: [...prevState.hits, ...hits],
-          totalHits: totalHits,
-          loading: false,
-        }));
+        setHits(prevState => [...prevState, ...images]);
+        setTotalHits(totalHits);
+        setIsLoading(false);
+        
       } catch (error) {
         toast.error('Something went wrong...');
       } finally {
-        this.setState({ loading: false });
-      }}}
+        setIsLoading(false);
+      }}
 
-  handleSubmit = query => {
-    this.setState({
-      query,
-      hits: [],
-      page: 1,
-    });
+      fetchGallery();
+    }, [query, page]);
+    
+
+  const handleSubmit = inputValue => {
+      setQuery(inputValue)
+      setHits([]);
+      setPage(1);
   };
 
-  loadMoreImage = () => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+  const loadMoreImage = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  selectImage = imageURL => {
-    this.setState({ selectedImage: imageURL });
-  };
+  const selectImage = imageURL => setSelectedImage(imageURL);
 
-  closeImage = () => {
-    this.setState({ selectedImage: null });
-  };
+  const closeImage = () => setSelectedImage(null);
 
-  render() {
-    const { loading, hits, totalHits, selectedImage } = this.state;
     return (
         <div>
-          <Searchbar handleSubmit={this.handleSubmit} />
-          {loading && <Loader isLoading={loading} />}
+          <Searchbar handleSubmit={handleSubmit} />
+          {isLoading && <Loader isLoading={isLoading} />}
           {hits.length > 0 && (
-            <ImageGallery selectImage={this.selectImage} hits={hits} />
+            <ImageGallery selectImage={selectImage} hits={hits} />
           )}
           {totalHits && totalHits !== hits.length && (
-            <Button loadMore={this.loadMoreImage} />
+            <Button loadMore={loadMoreImage} />
           )}
           {selectedImage && (
           <ModalContainer
             selectedImage={selectedImage}
-            closeImage={this.closeImage}
+            closeImage={closeImage}
           />
           )}
           <ToastContainer autoClose={2000} />
         </div>
     );
-  }
-}
+  };

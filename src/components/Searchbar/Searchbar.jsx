@@ -9,9 +9,6 @@ export const Searchbar = ({ handleSubmit }) => {
 
     const query = event.target.elements.query.value.trim();
 
-    if (!query) 
-    return;
-
     handleSubmit(query);
     event.target.reset();
   };
